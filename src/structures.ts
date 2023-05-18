@@ -9,21 +9,6 @@ type ServiceLocation = {
 	commandAccessRoleIds: Snowflake[];
 }
 
-type BGDCData = {
-	msSessionsSheetId: string;
-	msSessionsSubjectRanges: {
-		PROGA: string;
-		PROGB: string;
-		DESG: string;
-		A2D: string;
-		A3D: string;
-		SND: string;
-	};
-
-	attdetCsvGdriveFolderId: string;
-	procdetCsvGdriveFolderId: string;
-}
-
 export type PushLogTargetConfig = PushLogTargetHttpJson
 
 export interface PushLogTargetHttpJson {
@@ -34,7 +19,6 @@ export interface PushLogTargetHttpJson {
 export type ConfigFile = {
 	token: Snowflake;
 	serviceLocationWhiteList: ServiceLocation[];
-	bgdc: BGDCData;
 	pushLogTarget: PushLogTargetConfig | undefined;
 }
 
@@ -80,11 +64,4 @@ export class Session {
 	log(type : EventType, uid : Snowflake, time : DateTime = Util.dtnow()) {
 		this.events[this.events.length] = new Event(type, uid, time);
 	}
-}
-
-export type SessionOutput = {
-	sesinfo: string,
-	attdet: string,
-	procdet: string,
-	embed: MessageEmbed
 }
