@@ -3,7 +3,7 @@ import { CommandHandler } from "..";
 import { PushlogTarget } from "../pushlogTarget";
 import { SessionLogStore } from "../sessionLogStore";
 
-export class PushlogHandler implements CommandHandler {
+export default class PushlogHandler implements CommandHandler {
     signature: ApplicationCommandData = {
         name: "pushlogv2",
         description: "[EXPERIMENTAL] Pushes the specified session's logs to an external archive",

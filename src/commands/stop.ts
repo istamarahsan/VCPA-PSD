@@ -3,7 +3,7 @@ import { CommandHandler } from "..";
 import { SessionService } from "../session";
 import { SessionLogStore } from "../sessionLogStore";
 
-export class StopSessionHandler implements CommandHandler {
+export default class StopSessionHandler implements CommandHandler {
     signature: ApplicationCommandData = {
         name: "stop",
         description: "Stops a session",

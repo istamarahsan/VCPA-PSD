@@ -6,9 +6,10 @@ import { ISqlite, open } from "sqlite";
 import * as fs from "fs";
 import { PushlogHttp } from "./pushlogTarget";
 import StartSessionHandler from "./commands/start";
+import StopSessionHandler from "./commands/stop";
+import PushlogHandler from "./commands/pushlog";
 import { InMemoryOngoingSessionStore, SessionService } from "./session";
 import * as Date from "./util/date";
-import { StopSessionHandler } from "./commands/stop";
 
 global.config = jsonfile.readFileSync("./config.json");
 const dbFile = "data/session-logs.db";
@@ -23,11 +24,14 @@ export interface CommandHandler {
 	execute(interaction: CommandInteraction): Promise<void>;
 }
 
-const sessionService = new SessionService(new InMemoryOngoingSessionStore(), Date.utcProvider())
+const sessionService = new SessionService(new InMemoryOngoingSessionStore(), Date.utcProvider());
+const sesssionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider());
+const pushlogTarget = global.pushlogTarget;
 
 const commands: CommandHandler[] = [
 	new StartSessionHandler(sessionService),
-	new StopSessionHandler(sessionService, new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider()))
+	new StopSessionHandler(sessionService, sesssionLogStore),
+	new PushlogHandler(sessionLogStore, pushlogTarget)
 ];
 
 const client = new Client({

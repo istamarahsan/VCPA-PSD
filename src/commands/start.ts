@@ -2,7 +2,7 @@ import { ApplicationCommandData, CommandInteraction, CacheType } from "discord.j
 import { CommandHandler } from "..";
 import { SessionService } from "../session";
 
-export class StartSessionHandler implements CommandHandler {
+export default class StartSessionHandler implements CommandHandler {
     signature: ApplicationCommandData = {
         name: "start",
         description: "Starts a session",
