@@ -2,7 +2,7 @@ import { Snowflake, SnowflakeUtil } from "discord.js";
 import { DateTime } from "luxon";
 import { Database, ISqlite, open } from "sqlite";
 import sqlite3 from "sqlite3";
-import { DateTimeProvider, dtnow } from "./util";
+import { DateTimeProvider, dtnow } from "./util/date";
 
 export type SessionLogId = Snowflake
 export type SessionEvent = JoinedChannelEvent | LeftChannelEvent

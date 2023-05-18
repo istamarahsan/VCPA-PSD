@@ -1,7 +1,6 @@
 import { Snowflake, MessageEmbed } from "discord.js";
 import { DateTime } from "luxon";
-
-import * as Util from "./util";
+import * as date from "./util/date";
 
 type ServiceLocation = {
 	guildId: Snowflake;
@@ -54,14 +53,14 @@ export class Session {
 	}
 
 	start() {
-		this.startTime = Util.dtnow();
+		this.startTime = date.dtnow();
 	}
 
 	end() {
-		this.endTime = Util.dtnow();
+		this.endTime = date.dtnow();
 	}
 
-	log(type : EventType, uid : Snowflake, time : DateTime = Util.dtnow()) {
+	log(type : EventType, uid : Snowflake, time : DateTime = date.dtnow()) {
 		this.events[this.events.length] = new Event(type, uid, time);
 	}
 }
