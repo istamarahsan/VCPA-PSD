@@ -1,4 +1,4 @@
-import { SessionLogStore } from "../sessionLog";
+import { SessionLogStore } from "../session";
 import { ConfigFile, Session } from "../structures"
 
 declare global {

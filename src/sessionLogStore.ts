@@ -1,38 +1,9 @@
-import { Snowflake, SnowflakeUtil } from "discord.js";
+import { SnowflakeUtil } from "discord.js";
 import { DateTime } from "luxon";
 import { Database, ISqlite, open } from "sqlite";
-import sqlite3 from "sqlite3";
+import { CompletedSession, SessionLogId, SessionLog, SessionEvent } from "./session";
 import { DateTimeProvider, dtnow } from "./util/date";
-
-export type SessionLogId = Snowflake
-export type SessionEvent = JoinedChannelEvent | LeftChannelEvent
-
-export interface JoinedChannelEvent {
-	type: "Join";
-	userId: Snowflake;
-	timeOccurred: DateTime;
-}
-
-export interface LeftChannelEvent {
-	type: "Leave";
-	userId: Snowflake;
-	timeOccurred: DateTime;
-}
-
-export interface CompletedSession {
-	ownerId: Snowflake;
-	guildId: Snowflake;
-	channelId: Snowflake;
-	timeStarted: DateTime;
-	timeEnded: DateTime;
-	events: SessionEvent[];
-}
-
-export interface SessionLog extends CompletedSession {
-	id: SessionLogId;
-	timeStored: DateTime;
-	timePushed: DateTime | undefined;
-}
+import sqlite3 from "sqlite3";
 
 export interface SessionLogStore {
 	store(completedSession: CompletedSession): Promise<SessionLogId | undefined>;
@@ -57,7 +28,7 @@ export class SqliteSessionLogStore implements SessionLogStore {
 		};
 	}
 
-	public async latestUnpushed(): Promise<SessionLog> {
+	public async latestUnpushed(): Promise<SessionLog | undefined> {
 		const db = await this.connectionProvider.getConnection();
 		try {
 			const sessionResult = await db.get(
@@ -202,7 +173,7 @@ export class SqliteSessionLogStore implements SessionLogStore {
 		}
 	}
 
-	private convertResultToSession(obj: Object, events: SessionEvent[]): SessionLog {
+	private convertResultToSession(obj: any, events: SessionEvent[]): SessionLog {
 		return {
 			id: obj['id'] as string,
 			ownerId: obj['owner_id'] as string,
@@ -216,7 +187,7 @@ export class SqliteSessionLogStore implements SessionLogStore {
 		};
 	}
 
-	private convertResultToEvent(obj: Object): SessionEvent {
+	private convertResultToEvent(obj: any): SessionEvent {
 		switch (obj['event_code']) {
 			case "JOIN":
 				return {
