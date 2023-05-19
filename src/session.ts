@@ -110,6 +110,7 @@ export class SessionService {
 			events: []
 		}
 		newSession.events.push(...startJoinEvents);
+		await this.ongoingSessionStore.put(newSession);
 		return ok(newSession);
 	}
 	async stopSession(guildId: Snowflake, channel: VoiceChannel): Promise<Result<CompletedSession, StopSessionError>> {
