@@ -96,13 +96,20 @@ export class SessionService {
 		if (!channel.isVoice()) {
 			return error("ChannelNotVoice");
 		}
+		const timeStarted = this.dateTimeProvider.now();
+		const startJoinEvents = channel.members.map<SessionEvent>(member => ({
+			type: "Join",
+			userId: member.id,
+			timeOccurred: timeStarted
+		}));
 		const newSession: OngoingSession = {
 			ownerId: ownerId,
 			guildId: guildId,
 			channelId: channel.id,
-			timeStarted: this.dateTimeProvider.now(),
+			timeStarted: timeStarted,
 			events: []
 		}
+		newSession.events.push(...startJoinEvents);
 		return ok(newSession);
 	}
 	async stopSession(guildId: Snowflake, channel: VoiceChannel): Promise<Result<CompletedSession, StopSessionError>> {

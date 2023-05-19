@@ -1,4 +1,4 @@
-import { ApplicationCommandData, CommandInteraction, CacheType } from "discord.js";
+import { ApplicationCommandData, CommandInteraction, CacheType, GuildMember, VoiceChannel } from "discord.js";
 import { CommandHandler } from "..";
 import { SessionService } from "../session";
 import { SessionLogStore } from "../sessionLogStore";
@@ -26,7 +26,33 @@ export default class StopSessionHandler implements CommandHandler {
     }
 
     async execute(interaction: CommandInteraction<CacheType>): Promise<void> {
-        throw new Error("Method not implemented.");
+        const executor = interaction.member as GuildMember;
+        const argv = interaction.options;
+
+        const targetGuild = interaction.guildId;
+        const targetChannel = (argv.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
+
+        if (targetGuild == null) return;
+
+        const stopSessionResult = await this.sessionService.stopSession(targetGuild, targetChannel);
+
+        if (!stopSessionResult.ok) {
+            const error = stopSessionResult.value;
+            if (error === "SessionNotFound") {
+                await interaction.reply(`There is no ongoing session in <#${targetChannel.id}>.`)
+            }
+            return;
+        }
+        
+        const completedSession = stopSessionResult.value;
+
+        const sessionLogId = await this.sessionLogStore.store(completedSession);
+        if (stopSessionResult === undefined) {
+            await interaction.reply(`Stopped the session in <#${targetChannel.id}>, but FAILED to store the session log.`); 
+            return;
+        }
+
+        await interaction.reply(`Stopped the session in <#${targetChannel.id}>, log stored with ID: ${sessionLogId}`);
     }
 
 }
