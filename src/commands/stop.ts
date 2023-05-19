@@ -32,7 +32,7 @@ export default class StopSessionHandler implements CommandHandler {
         const targetGuild = interaction.guildId;
         const targetChannel = (argv.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
 
-        if (targetGuild == null) return;
+        if (targetGuild === null) return;
 
         const stopSessionResult = await this.sessionService.stopSession(targetGuild, targetChannel);
 
