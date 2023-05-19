@@ -1,19 +1,21 @@
 import { Snowflake } from "discord.js";
 import axios from "axios";
+import { DateTime, Duration } from "luxon";
 
 export type PushlogResponse = "SUCCESS" | "FAILURE"
 
+export type AttendanceDetail = {
+    discordUserId: Snowflake,
+    attendanceDuration: Duration
+}
+
 export type PushlogData = {
     topicId: string,
-    sessionDateISO: string,
-    sessionTimeISO: string,
-    durationISO: string,
+    sessionDateTime: DateTime,
+    sessionDuration: Duration,
     recorderName: string,
     mentorDiscordUserIds: Array<Snowflake>
-    attendees: Array<{
-        discordUserId: Snowflake,
-        attendanceDurationISO: string
-    }>
+    attendees: Array<AttendanceDetail>
 }
 
 export interface PushlogTarget {
@@ -29,7 +31,15 @@ export class PushlogHttp implements PushlogTarget {
     }
 
     public async push(logData: PushlogData): Promise<PushlogResponse> {
-        const payload = JSON.stringify(logData);
+        const payload = JSON.stringify({
+            ...logData,
+            sessionDateTime: logData.sessionDateTime.toUTC().toISO(),
+            sessionDuration: logData.sessionDuration.toISO(),
+            attendees: logData.attendees.map((attendee) => ({
+                ...attendee,
+                attendanceDuration: attendee.attendanceDuration.toISO()
+            }))
+        });
         try {
             const response = await axios.post(this.endpoint, payload);
             return response.status === 200 ? "SUCCESS" : "FAILURE";
