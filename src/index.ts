@@ -10,14 +10,11 @@ import StopSessionHandler from "./commands/stop";
 import PushlogHandler from "./commands/pushlog";
 import { InMemoryOngoingSessionStore, SessionService } from "./session";
 import * as Date from "./util/date";
+import { ConfigFile } from "./structures";
 
-global.config = jsonfile.readFileSync("./config.json");
+const config = jsonfile.readFileSync("./config.json") as ConfigFile;
 const dbFile = "data/session-logs.db";
 const dbConfig = { filename: dbFile, driver: sqlite3.Database, mode: sqlite3.OPEN_READWRITE }
-
-if (global.config.pushLogTarget?.type === "http-json") {
-	global.pushlogTarget = new PushlogHttp(global.config.pushLogTarget.endpoint);
-} else global.pushlogTarget = undefined;
 
 export interface CommandHandler {
 	signature: ApplicationCommandData;
@@ -25,12 +22,15 @@ export interface CommandHandler {
 }
 
 const sessionService = new SessionService(new InMemoryOngoingSessionStore(), Date.utcProvider());
-const sesssionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider());
-const pushlogTarget = global.pushlogTarget;
+const sessionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider());
+const pushlogTarget = config.pushLogTarget?.type === "http-json" ? new PushlogHttp(config.pushLogTarget.endpoint) : undefined;
+if (pushlogTarget === undefined) {
+	throw new Error("Push log target is not defined");
+}
 
 const commands: CommandHandler[] = [
 	new StartSessionHandler(sessionService),
-	new StopSessionHandler(sessionService, sesssionLogStore),
+	new StopSessionHandler(sessionService, sessionLogStore),
 	new PushlogHandler(sessionLogStore, pushlogTarget)
 ];
 
@@ -48,7 +48,6 @@ client.on("ready", async () => {
 		await performMigrations(dbConfig, "./data");
 	}
 	await registerCommands(client);
-	global.sessionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig));
 	console.log(`>>> Logged in as ${client.user!.tag}`);
 	console.log(`>>> Bonjour!`);
 });
@@ -78,7 +77,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 	}
 })
 
-client.login(global.config.token);
+client.login(config.token);
 
 async function performMigrations(config: ISqlite.Config, migrationsPath: string) {
 	const connection = await open(config);
@@ -89,7 +88,7 @@ async function performMigrations(config: ISqlite.Config, migrationsPath: string)
 }
 
 async function registerCommands(client : Client) {
-	global.config.serviceLocationWhiteList.forEach(async (serviceLocation) => {
+	config.serviceLocationWhiteList.forEach(async (serviceLocation) => {
 		// For every guild we plan to serve
 		const guild = await client.guilds.fetch(serviceLocation.guildId);
 
@@ -109,7 +108,7 @@ export async function handleCommand(interaction : CommandInteraction) {
 	const executorGuild = interaction.guild;
 
 	// Check if the command was issued from a location we service
-	const requiredGuild = global.config.serviceLocationWhiteList.filter((serviceLocation) => serviceLocation.guildId === executorGuild?.id);
+	const requiredGuild = config.serviceLocationWhiteList.filter((serviceLocation) => serviceLocation.guildId === executorGuild?.id);
 
 	if (requiredGuild.length <= 0) {
 		console.log(`>>> ${executor.id} tried to issue commands from without being in a serviced guild!`);
