@@ -10,7 +10,7 @@ import StopSessionHandler from "./commands/stop";
 import PushlogHandler from "./commands/pushlog";
 import { InMemoryOngoingSessionStore, SessionService } from "./session";
 import * as Date from "./util/date";
-import { ConfigFile } from "./structures";
+import { ConfigFile } from "./util/config";
 
 const config = jsonfile.readFileSync("./config.json") as ConfigFile;
 const dbFile = "data/session-logs.db";
