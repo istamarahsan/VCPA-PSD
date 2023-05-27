@@ -27,25 +27,15 @@ export interface OngoingSession {
 	events: SessionEvent[];
 }
 
-export interface CompletedSession {
-	ownerId: Snowflake;
-	guildId: Snowflake;
-	channelId: Snowflake;
-	timeStarted: DateTime;
+export interface CompletedSession extends OngoingSession {
 	timeEnded: DateTime;
 	events: SessionEvent[];
 }
 
-export interface SessionLog {
+export interface SessionLog extends CompletedSession {
 	id: SessionLogId;
 	timeStored: DateTime;
 	timePushed: DateTime | undefined;
-	ownerId: Snowflake;
-	guildId: Snowflake;
-	channelId: Snowflake;
-	timeStarted: DateTime;
-	timeEnded: DateTime;
-	events: SessionEvent[];
 }
 
 
