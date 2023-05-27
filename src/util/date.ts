@@ -1,13 +1,13 @@
 import { DateTime } from "luxon";
 
-export interface DateTimeProvider { 
-	now(): DateTime
+export interface DateTimeProvider {
+	now(): DateTime;
 }
 
 export function utcProvider(): DateTimeProvider {
 	return {
 		now: () => dtnow()
-	}
+	};
 }
 
 export function dtnow() {

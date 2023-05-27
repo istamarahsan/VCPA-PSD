@@ -1,12 +1,14 @@
 import { z } from "zod";
 
-const schema = z.object({
-	BOT_TOKEN: z.string()
-}).required();
+const schema = z
+	.object({
+		BOT_TOKEN: z.string()
+	})
+	.required();
 
 export type Env = {
-	BOT_TOKEN: string
-}
+	BOT_TOKEN: string;
+};
 
 export function loadEnv(): Env | undefined {
 	const result = schema.safeParse({
@@ -16,6 +18,5 @@ export function loadEnv(): Env | undefined {
 		return {
 			BOT_TOKEN: result.data.BOT_TOKEN
 		};
-	}
-	else return undefined;
+	} else return undefined;
 }
