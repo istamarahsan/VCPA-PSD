@@ -1,6 +1,5 @@
 build/
-config.json
-gcreds.json
+config/config.json
 tsconfig.json
 node_modules/
 run/
