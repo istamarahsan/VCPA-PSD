@@ -2,7 +2,6 @@ import { Snowflake } from "discord.js";
 
 type ServiceLocation = {
 	guildId: Snowflake;
-	ioChannelId: Snowflake;
 	commandAccessRoleIds: Snowflake[];
 }
 
