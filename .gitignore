@@ -5,3 +5,4 @@ run/
 coverage/
 .vscode/
 data/*.db
+.env
