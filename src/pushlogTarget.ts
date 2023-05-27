@@ -1,8 +1,9 @@
 import { Snowflake } from "discord.js";
 import axios from "axios";
 import { DateTime, Duration } from "luxon";
+import { Result, error, ok } from "./util/result";
 
-export type PushlogResponse = "SUCCESS" | "FAILURE"
+export type PushlogResponse = Result<undefined, Error | undefined>
 
 export type AttendanceDetail = {
     discordUserId: Snowflake,
@@ -42,9 +43,9 @@ export class PushlogHttp implements PushlogTarget {
         });
         try {
             const response = await axios.post(this.endpoint, payload);
-            return response.status === 200 ? "SUCCESS" : "FAILURE";
-        } catch (error) {
-            return "FAILURE";
+            return response.status === 200 ? ok(undefined) : error(new Error(`HTTP Error: Response Code ${response.status}`));
+        } catch (e) {
+            return e instanceof Error ? error(e) : error(undefined);
         }
     }
 

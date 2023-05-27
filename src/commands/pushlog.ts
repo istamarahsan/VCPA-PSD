@@ -65,13 +65,13 @@ export default class PushlogHandler implements CommandHandler {
             }
             return;
         }
-        const pushResult = await this.pushlogTarget.push(
+        const pushlogResult = await this.pushlogTarget.push(
             this.toPushData(logToPush, interaction.options.getString("topic-id")!, 
             interaction.options.getString("documentator")!, 
             interaction.options.getString("mentors")!)
             );
-        if (pushResult === "FAILURE") {
-            await interaction.reply("Failed to push log.");
+        if (!pushlogResult.ok) {
+            await interaction.reply(`Failed to push log: "${pushlogResult.error ?? "UNKNOWN ERROR"}"`);
             return;
         }
         await interaction.reply("Successfully pushed log.");
