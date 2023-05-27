@@ -28,7 +28,7 @@ export interface CommandHandler {
 
 const sessionService = new SessionService(new InMemoryOngoingSessionStore(), Date.utcProvider());
 const sessionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider());
-const pushlogTarget = config.pushLogTarget?.type === "http-json" ? new PushlogHttp(config.pushLogTarget.endpoint) : undefined;
+const pushlogTarget = config.pushlogTarget?.type === "http-json" ? new PushlogHttp(config.pushlogTarget.endpoint) : undefined;
 if (pushlogTarget === undefined) {
 	throw new Error("❌ Push log target is not defined");
 }

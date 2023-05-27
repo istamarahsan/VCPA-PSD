@@ -14,5 +14,5 @@ export interface PushLogTargetHttpJson {
 
 export type ConfigFile = {
 	serviceLocationWhiteList: ServiceLocation[];
-	pushLogTarget: PushLogTargetConfig | undefined;
+	pushlogTarget: PushLogTargetConfig | undefined;
 }
