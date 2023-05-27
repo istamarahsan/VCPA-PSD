@@ -1,4 +1,4 @@
-import { ApplicationCommand, ApplicationCommandData, Client, CommandInteraction, GuildMember, Intents } from "discord.js";
+import { ApplicationCommandData, Client, CommandInteraction, Intents } from "discord.js";
 import * as jsonfile from "jsonfile";
 import { LazyConnectionProvider, SqliteSessionLogStore } from "./sessionLogStore";
 import sqlite3 from "sqlite3";
@@ -54,26 +54,27 @@ client.on("ready", async () => {
 
 client.on("interactionCreate", async (interaction) => {
 	if (!interaction.isCommand()) return;
-	await routeCommand(interaction);
+	await routeCommandAndMiddleware(interaction);
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
-	const person = newState.id;
+	const userId = newState.id;
 	const oldGuild = oldState.guild.id;
 	const oldChannel = oldState.channelId;
 	const newGuild = newState.guild.id;
 	const newChannel = newState.channelId;
+	
+	const hasJoinedAVoiceChannel = oldChannel === null && newChannel !== null;
+	const hasLeftAVoiceChannel = oldChannel !== null && newChannel === null;
+	const hasMovedVoiceChannel = oldChannel !== null && newChannel !== null;
 
-	if ((oldChannel === null) && (newChannel !== null)) {
-		// User was not in a voice channel, and now joined our voice channel
-		await sessionService.handleJoinedChannel(person, newGuild, newChannel);
-	} else if ((oldChannel !== null) && (newChannel === null)) {
-		// User was in our voice channel, and now isn't in a voice channel
-		await sessionService.handleLeftChannel(person, oldGuild, oldChannel);
-	} else if ((oldChannel !== null) && (newChannel !== null)) {
-		// User was in a different voice channel, and now is in our voice channel
-		await sessionService.handleLeftChannel(person, oldGuild, oldChannel);
-		await sessionService.handleJoinedChannel(person, newGuild, newChannel);
+	if (hasJoinedAVoiceChannel) {
+		await sessionService.handleJoinedChannel(userId, newGuild, newChannel);
+	} else if (hasLeftAVoiceChannel) {
+		await sessionService.handleLeftChannel(userId, oldGuild, oldChannel);
+	} else if (hasMovedVoiceChannel) {
+		await sessionService.handleLeftChannel(userId, oldGuild, oldChannel);
+		await sessionService.handleJoinedChannel(userId, newGuild, newChannel);
 	}
 })
 
@@ -97,7 +98,7 @@ async function registerCommands(client : Client) {
 	});
 }
 
-export async function routeCommand(interaction : CommandInteraction) {
+export async function routeCommandAndMiddleware(interaction : CommandInteraction) {
 	if (!interaction.inGuild() || interaction.guild === null || interaction.guildId === null) {
 		await interaction.reply(`This bot does not support non-server commands`);
 		return;
