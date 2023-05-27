@@ -17,6 +17,9 @@ const env = loadEnv();
 if (env === undefined) {
 	throw new Error("❌ Invalid environment variables");
 }
+if (!fs.existsSync("./config/config.json")) {
+	throw new Error("❌ Config file not found in **config/config.json**");
+}
 const config = jsonfile.readFileSync("./config/config.json") as ConfigFile;
 const dbFile = "data/session-logs.db";
 const dbConfig = { filename: dbFile, driver: sqlite3.Database, mode: sqlite3.OPEN_READWRITE }
