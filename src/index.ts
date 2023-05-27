@@ -45,7 +45,7 @@ const client = new Client({
 client.on("ready", async () => {
 	if (!fs.existsSync(dbFile)) {
 		fs.writeFileSync(dbFile, "");
-		await performMigrations(dbConfig, "./data");
+		await performMigrations(dbConfig, "./migrations");
 	}
 	await registerCommands(client);
 	console.log(`>>> Logged in as ${client.user!.tag}`);
