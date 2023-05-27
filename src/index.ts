@@ -11,7 +11,12 @@ import PushlogHandler from "./commands/pushlog";
 import { InMemoryOngoingSessionStore, SessionService } from "./session";
 import * as Date from "./util/date";
 import { ConfigFile } from "./util/config";
+import { loadEnv } from "./util/env";
 
+const env = loadEnv();
+if (env === undefined) {
+	throw new Error("❌ Invalid environment variables");
+}
 const config = jsonfile.readFileSync("./config/config.json") as ConfigFile;
 const dbFile = "data/session-logs.db";
 const dbConfig = { filename: dbFile, driver: sqlite3.Database, mode: sqlite3.OPEN_READWRITE }
@@ -25,7 +30,7 @@ const sessionService = new SessionService(new InMemoryOngoingSessionStore(), Dat
 const sessionLogStore = new SqliteSessionLogStore(new LazyConnectionProvider(dbConfig), Date.utcProvider());
 const pushlogTarget = config.pushLogTarget?.type === "http-json" ? new PushlogHttp(config.pushLogTarget.endpoint) : undefined;
 if (pushlogTarget === undefined) {
-	throw new Error("Push log target is not defined");
+	throw new Error("❌ Push log target is not defined");
 }
 
 const commands: CommandHandler[] = [
@@ -78,7 +83,7 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 	}
 })
 
-client.login(config.token);
+client.login(env.BOT_TOKEN);
 
 async function performMigrations(config: ISqlite.Config, migrationsPath: string) {
 	const connection = await open(config);

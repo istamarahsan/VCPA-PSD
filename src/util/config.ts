@@ -13,7 +13,6 @@ export interface PushLogTargetHttpJson {
 }
 
 export type ConfigFile = {
-	token: Snowflake;
 	serviceLocationWhiteList: ServiceLocation[];
 	pushLogTarget: PushLogTargetConfig | undefined;
 }
