@@ -1,5 +1,5 @@
 build/
-config.json
+config/
 gcreds.json
 node_modules/
 run/

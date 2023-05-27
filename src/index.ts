@@ -12,7 +12,7 @@ import { InMemoryOngoingSessionStore, SessionService } from "./session";
 import * as Date from "./util/date";
 import { ConfigFile } from "./util/config";
 
-const config = jsonfile.readFileSync("./config.json") as ConfigFile;
+const config = jsonfile.readFileSync("./config/config.json") as ConfigFile;
 const dbFile = "data/session-logs.db";
 const dbConfig = { filename: dbFile, driver: sqlite3.Database, mode: sqlite3.OPEN_READWRITE }
 
