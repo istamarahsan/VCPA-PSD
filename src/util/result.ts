@@ -5,15 +5,15 @@ export interface Ok<T> {
 
 export interface Err<E> {
     ok: false;
-    value: E;
+    error: E;
 }
 
 export type Result<T, E = undefined> = Ok<T> | Err<E>;
 
-export function error<E, T = undefined>(value: E): Result<T, E> {
+export function error<E, T = undefined>(error: E): Result<T, E> {
     return {
         ok: false,
-        value: value
+        error: error
     }
 }
 

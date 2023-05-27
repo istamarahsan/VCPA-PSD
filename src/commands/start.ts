@@ -28,10 +28,9 @@ export default class StartSessionHandler implements CommandHandler {
         if (interaction.guildId === null) return;
         const startSessionResult = await this.sessionService.startSession(executor.id, interaction.guildId, targetChannel);
         if (!startSessionResult.ok) {
-            const error = startSessionResult.value;
-            if (error === "ChannelNotVoice") {
+            if (startSessionResult.error === "ChannelNotVoice") {
                 await interaction.reply("The specified channel is not a voice channel.");
-            } else if (error === "SessionOngoing") {
+            } else if (startSessionResult.error === "SessionOngoing") {
                 await interaction.reply("A session is already ongoing in that channel.");
             }
             return;

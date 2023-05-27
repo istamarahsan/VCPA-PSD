@@ -31,8 +31,7 @@ export default class StopSessionHandler implements CommandHandler {
         if (interaction.guildId === null) return;
         const stopSessionResult = await this.sessionService.stopSession(interaction.guildId, targetChannel);
         if (!stopSessionResult.ok) {
-            const error = stopSessionResult.value;
-            if (error === "SessionNotFound") {
+            if (stopSessionResult.error === "SessionNotFound") {
                 await interaction.reply(`There is no ongoing session in <#${targetChannel.id}>.`)
             }
             return;
