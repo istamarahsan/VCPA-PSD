@@ -54,7 +54,7 @@ client.on("ready", async () => {
 	}
 	await registerCommands(client);
 	console.log(`>>> Logged in as ${client.user!.tag}`);
-	console.log(`>>> Bonjour!`);
+	console.log(`>>> Guten Tag!`);
 });
 
 client.on("interactionCreate", async (interaction) => {
