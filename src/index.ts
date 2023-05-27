@@ -1,4 +1,4 @@
-import { ApplicationCommandData, Client, CommandInteraction, GuildMember, Intents } from "discord.js";
+import { ApplicationCommand, ApplicationCommandData, Client, CommandInteraction, GuildMember, Intents } from "discord.js";
 import * as jsonfile from "jsonfile";
 import { LazyConnectionProvider, SqliteSessionLogStore } from "./sessionLogStore";
 import sqlite3 from "sqlite3";
@@ -54,7 +54,7 @@ client.on("ready", async () => {
 
 client.on("interactionCreate", async (interaction) => {
 	if (!interaction.isCommand()) return;
-	await handleCommand(interaction);
+	await routeCommand(interaction);
 });
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
@@ -89,51 +89,40 @@ async function performMigrations(config: ISqlite.Config, migrationsPath: string)
 
 async function registerCommands(client : Client) {
 	config.serviceLocationWhiteList.forEach(async (serviceLocation) => {
-		// For every guild we plan to serve
 		const guild = await client.guilds.fetch(serviceLocation.guildId);
-
-		// Start fresh
 		guild.commands.set([]);
-
-		// Add all the commands
-		commands.forEach(async (command) => {
-			await guild.commands.create(command.signature);
-		});
+		for (const commandToCreate of commands) {
+			await guild.commands.create(commandToCreate.signature);
+		}
 	});
 }
 
-export async function handleCommand(interaction : CommandInteraction) {
-	const executor = interaction.member as GuildMember;
-
-	const executorGuild = interaction.guild;
-
-	// Check if the command was issued from a location we service
-	const requiredGuild = config.serviceLocationWhiteList.filter((serviceLocation) => serviceLocation.guildId === executorGuild?.id);
-
-	if (requiredGuild.length <= 0) {
-		console.log(`>>> ${executor.id} tried to issue commands from without being in a serviced guild!`);
-		await interaction.reply(`<@${executor.id}> tried to issue commands without being in a serviced guild!`);
+export async function routeCommand(interaction : CommandInteraction) {
+	if (!interaction.inGuild() || interaction.guild === null || interaction.guildId === null) {
+		await interaction.reply(`This bot does not support non-server commands`);
 		return;
 	}
-
-	// Check if the command executor has at least one of the roles allowed to use the bot
-	const executorRoles = executor.roles;
-	const authorizedRoles = requiredGuild[0].commandAccessRoleIds;
-
-	if (!executorRoles.cache.hasAny(...authorizedRoles)) {
-		console.log(`>>> ${executor.id} tried to issue commands without having the appropriate permission!`);
-		await interaction.reply(`<@${executor.id}> tried to issue commands without having the appropriate permission!`);
+	const guildIsAuthorized = config.serviceLocationWhiteList
+		.filter((serviceLocation) => serviceLocation.guildId === interaction.guildId)
+		.length === 1;
+	if (!guildIsAuthorized) {
+		console.log(`>>> ${interaction.user.id} tried to issue commands from without being in a serviced guild!`);
+		await interaction.reply(`<@${interaction.user.id}> tried to issue commands without being in a serviced guild!`);
 		return;
 	}
-
-	const executorCommand = interaction.command?.name;
-
-	if (executorCommand === null) return;
-
-	for (let i = 0; i < commands.length; i++) {
-		if (executorCommand === commands[i].signature.name) {
-			await commands[i].execute(interaction);
-			return;
-		}
+	const memberData = await interaction.guild.members.fetch(interaction.user.id);
+	const rolesWithPermission = config.serviceLocationWhiteList
+		.filter(g => g.guildId === interaction.guildId)
+		.flatMap(g => g.commandAccessRoleIds);
+	if (memberData.roles.cache.hasAny(...rolesWithPermission)) {
+		console.log(`>>> ${interaction.user.id} tried to issue commands without having the appropriate permission!`);
+		await interaction.reply(`<@${interaction.user.id}> tried to issue commands without having the appropriate permission!`);
+		return;
+	}
+	const matchedCommand: CommandHandler | undefined = commands.filter(c => c.signature.name === interaction.commandName)[0];
+	if (matchedCommand) {
+		await matchedCommand.execute(interaction);
+	} else {
+		await interaction.reply(`Command "${interaction.commandName} not recognized"`);
 	}
 };
