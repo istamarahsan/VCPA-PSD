@@ -1,5 +1,5 @@
-import { ApplicationCommandData, CommandInteraction, CacheType, GuildMember, VoiceChannel } from "discord.js";
-import { CommandHandler } from "..";
+import { ApplicationCommandData, CommandInteraction, GuildMember, VoiceChannel } from "discord.js";
+import { CommandHandler } from "../index";
 import { SessionService } from "../session";
 
 export default class StartSessionHandler implements CommandHandler {

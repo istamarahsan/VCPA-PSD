@@ -1,9 +1,9 @@
-import { ApplicationCommandData, CommandInteraction, CacheType, GuildMember } from "discord.js";
-import { CommandHandler } from "..";
+import { ApplicationCommandData, CommandInteraction } from "discord.js";
+import { CommandHandler } from "../index";
 import { PushlogData, PushlogTarget } from "../pushlogTarget";
 import { SessionLogStore } from "../sessionLogStore";
 import { SessionLog } from "../session";
-import { DateTime, Duration } from "luxon";
+import { Duration } from "luxon";
 
 export default class PushlogHandler implements CommandHandler {
     signature: ApplicationCommandData = {

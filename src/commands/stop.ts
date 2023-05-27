@@ -1,5 +1,5 @@
 import { ApplicationCommandData, CommandInteraction, CacheType, GuildMember, VoiceChannel } from "discord.js";
-import { CommandHandler } from "..";
+import { CommandHandler } from "../index";
 import { SessionService } from "../session";
 import { SessionLogStore } from "../sessionLogStore";
 
@@ -25,7 +25,7 @@ export default class StopSessionHandler implements CommandHandler {
         this.sessionLogStore = sessionLogStore;
     }
 
-    async execute(interaction: CommandInteraction<CacheType>): Promise<void> {
+    async execute(interaction: CommandInteraction): Promise<void> {
         const executor = interaction.member as GuildMember;
         const targetChannel = (interaction.options.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
         if (interaction.guildId === null) return;
