@@ -52,18 +52,11 @@ export default class PushlogHandler implements CommandHandler {
     }
 
     async execute(interaction: CommandInteraction): Promise<void> {
-        const executor = interaction.member as GuildMember;
-        const argv = interaction.options;
-        const targetGuild = interaction.guildId;
-
-        if (targetGuild === null) return;
-
-        const idOption = argv.getString("session-id");
-        
+        if (interaction.guildId === null) return;
+        const idOption = interaction.options.getString("session-id");
         const logToPush = idOption != null 
             ? await this.sessionLogStore.retrieve(idOption) 
             : await this.sessionLogStore.latestUnpushed()
-
         if (logToPush === undefined) {
             if (idOption != null) {
                 await interaction.reply(`Could not find a session log with ID '${idOption}' to push.`);
@@ -72,8 +65,11 @@ export default class PushlogHandler implements CommandHandler {
             }
             return;
         }
-
-        const pushResult = await this.pushlogTarget.push(this.toPushData(logToPush, argv.getString("topic-id")!, argv.getString("documentator")!, argv.getString("mentors")!))
+        const pushResult = await this.pushlogTarget.push(
+            this.toPushData(logToPush, interaction.options.getString("topic-id")!, 
+            interaction.options.getString("documentator")!, 
+            interaction.options.getString("mentors")!)
+            );
         if (pushResult === "FAILURE") {
             await interaction.reply("Failed to push log.");
             return;

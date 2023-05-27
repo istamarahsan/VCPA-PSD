@@ -27,15 +27,9 @@ export default class StopSessionHandler implements CommandHandler {
 
     async execute(interaction: CommandInteraction<CacheType>): Promise<void> {
         const executor = interaction.member as GuildMember;
-        const argv = interaction.options;
-
-        const targetGuild = interaction.guildId;
-        const targetChannel = (argv.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
-
-        if (targetGuild === null) return;
-
-        const stopSessionResult = await this.sessionService.stopSession(targetGuild, targetChannel);
-
+        const targetChannel = (interaction.options.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
+        if (interaction.guildId === null) return;
+        const stopSessionResult = await this.sessionService.stopSession(interaction.guildId, targetChannel);
         if (!stopSessionResult.ok) {
             const error = stopSessionResult.value;
             if (error === "SessionNotFound") {
@@ -43,15 +37,12 @@ export default class StopSessionHandler implements CommandHandler {
             }
             return;
         }
-        
         const completedSession = stopSessionResult.value;
-
         const sessionLogId = await this.sessionLogStore.store(completedSession);
         if (stopSessionResult === undefined) {
             await interaction.reply(`Stopped the session in <#${targetChannel.id}>, but FAILED to store the session log.`); 
             return;
         }
-
         await interaction.reply(`Stopped the session in <#${targetChannel.id}>, log stored with ID: ${sessionLogId}`);
     }
 

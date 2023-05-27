@@ -24,15 +24,9 @@ export default class StartSessionHandler implements CommandHandler {
 
     async execute(interaction: CommandInteraction): Promise<void> {
         const executor = interaction.member as GuildMember;
-        const argv = interaction.options;
-
-        const targetGuild = interaction.guildId;
-        const targetChannel = (argv.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
-
-        if (targetGuild === null) return;
-
-        const startSessionResult = await this.sessionService.startSession(executor.id, targetGuild, targetChannel);
-
+        const targetChannel = (interaction.options.getChannel("channel") ?? executor.voice.channel) as VoiceChannel;
+        if (interaction.guildId === null) return;
+        const startSessionResult = await this.sessionService.startSession(executor.id, interaction.guildId, targetChannel);
         if (!startSessionResult.ok) {
             const error = startSessionResult.value;
             if (error === "ChannelNotVoice") {
@@ -42,7 +36,6 @@ export default class StartSessionHandler implements CommandHandler {
             }
             return;
         }
-
         const session = startSessionResult.value;
         await interaction.reply(`<@${session.ownerId}> started a session in <#${session.channelId}>`);
     }
