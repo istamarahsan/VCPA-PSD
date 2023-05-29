@@ -44,7 +44,7 @@ export class PushlogHttp implements PushlogTarget {
 			const response = await axios.post(this.endpoint, payload);
 			return response.status === 200
 				? ok(undefined)
-				: error(new Error(`HTTP Error: Response Code ${response.status}`));
+				: error(new Error(`HTTP Error: Response Code ${response.status}. ${response.data ? `Message: ${response.data}` : ""}`));
 		} catch (e) {
 			return e instanceof Error ? error(e) : error(undefined);
 		}
