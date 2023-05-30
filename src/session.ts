@@ -45,6 +45,7 @@ interface OngoingSessionStore {
 	has(guildId: Snowflake, channelId: Snowflake): Promise<boolean>;
 	get(guildId: Snowflake, channelId: Snowflake): Promise<OngoingSession | undefined>;
 	put(value: OngoingSession): Promise<void>;
+	remove(guildId: Snowflake, channelId: Snowflake): Promise<OngoingSession | undefined>;
 }
 
 export class SessionService {
@@ -120,6 +121,7 @@ export class SessionService {
 			...session,
 			timeEnded: timeEnded
 		};
+		await this.ongoingSessionStore.remove(guildId, channel.id);
 		return ok(completedSession);
 	}
 }
@@ -135,6 +137,14 @@ export class InMemoryOngoingSessionStore implements OngoingSessionStore {
 	}
 	async put(value: OngoingSession): Promise<void> {
 		this.map.set(this.composeKey(value.guildId, value.channelId), value);
+	}
+	async remove(guildId: string, channelId: string): Promise<OngoingSession | undefined> {
+		const existingSession = this.map.get(this.composeKey(guildId, channelId));
+		if (existingSession === undefined) {
+			return undefined;
+		}
+		this.map.delete(this.composeKey(guildId, channelId));
+		return existingSession;
 	}
 	private composeKey(guildId: string, channelId: string): string {
 		return `${guildId}-${channelId}`;
