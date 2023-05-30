@@ -38,7 +38,7 @@ export default class StopSessionHandler implements CommandHandler {
 		}
 		const completedSession = stopSessionResult.value;
 		const sessionLogId = await this.sessionLogStore.store(completedSession);
-		if (stopSessionResult === undefined) {
+		if (sessionLogId === undefined) {
 			await interaction.reply(
 				`Stopped the session in <#${targetChannel.id}>, but FAILED to store the session log.`
 			);
