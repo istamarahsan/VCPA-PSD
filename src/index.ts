@@ -120,7 +120,7 @@ export async function routeCommandAndMiddleware(interaction: CommandInteraction)
 	const rolesWithPermission = config.serviceLocationWhiteList
 		.filter((g) => g.guildId === interaction.guildId)
 		.flatMap((g) => g.commandAccessRoleIds);
-	if (memberData.roles.cache.hasAny(...rolesWithPermission)) {
+	if (!memberData.roles.cache.hasAny(...rolesWithPermission)) {
 		console.log(`>>> ${interaction.user.id} tried to issue commands without having the appropriate permission!`);
 		await interaction.reply(
 			`<@${interaction.user.id}> tried to issue commands without having the appropriate permission!`
